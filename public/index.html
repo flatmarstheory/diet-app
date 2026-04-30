@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Livasa Diet Tracker</title>
+  <style>
+    :root {
+      --teal: #00897b;
+      --teal-light: #e0f2f1;
+      --navy: #1a237e;
+      --purple: #512da8;
+      --red: #c62828;
+      --red-light: #ffebee;
+      --green: #2e7d32;
+      --green-light: #e8f5e9;
+      --yellow: #f9a825;
+      --yellow-light: #fffde7;
+      --gray: #f5f5f5;
+      --text: #212121;
+      --muted: #757575;
+      --card: #ffffff;
+      --border: #e0e0e0;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #eceff1;
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--purple) 100%);
+      color: white;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
+    .logo-area { display: flex; flex-direction: column; }
+    .logo-area h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: 0.5px; }
+    .logo-area p { font-size: 0.8rem; opacity: 0.8; }
+    .date-display {
+      background: rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      text-align: right;
+    }
+    .date-display .day { font-size: 1.1rem; font-weight: 600; }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      background: white;
+      border-bottom: 2px solid var(--border);
+      overflow-x: auto;
+    }
+    .tab-btn {
+      flex: 1;
+      min-width: 140px;
+      padding: 14px 20px;
+      border: none;
+      background: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .tab-btn.active { color: var(--navy); border-bottom-color: var(--navy); }
+    .tab-btn:hover:not(.active) { color: var(--text); background: var(--gray); }
+
+    /* MAIN */
+    main { max-width: 860px; margin: 0 auto; padding: 20px 16px 40px; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* CARDS */
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 14px 20px;
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-header .icon { font-size: 1.3rem; }
+    .card-body { padding: 16px 20px; }
+
+    /* PROGRESS BAR */
+    .progress-wrap { margin-bottom: 20px; }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .progress-bar-bg {
+      background: var(--border);
+      border-radius: 8px;
+      height: 10px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--teal), #43a047);
+      border-radius: 8px;
+      transition: width 0.4s ease;
+    }
+    .progress-pct {
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--teal);
+      margin-bottom: 4px;
+    }
+    .progress-caption { text-align: center; font-size: 0.82rem; color: var(--muted); }
+
+    /* MEAL ITEMS */
+    .meal-section { margin-bottom: 12px; }
+    .meal-time-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--purple);
+      margin-bottom: 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border);
+    }
+    .meal-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--border);
+      transition: background 0.15s;
+    }
+    .meal-item:last-child { border-bottom: none; }
+    .meal-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--teal);
+      flex-shrink: 0;
+      margin-top: 2px;
+      cursor: pointer;
+    }
+    .meal-text { flex: 1; }
+    .meal-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+    .meal-detail {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .meal-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: var(--teal-light);
+      color: var(--teal);
+      padding: 2px 8px;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+    .meal-item.done .meal-name { text-decoration: line-through; color: var(--muted); }
+    .meal-item.done .meal-badge { background: var(--green-light); color: var(--green); }
+
+    /* GUIDELINES */
+    .guideline-list { list-style: none; }
+    .guideline-list li {
+      display: flex;
+      gap: 10px;
+      padding: 8px 0;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      border-bottom: 1px solid var(--border);
+    }
+    .guideline-list li:last-child { border-bottom: none; }
+    .guideline-num {
+      width: 24px;
+      height: 24px;
+      background: var(--teal);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* AVOID LIST */
+    .avoid-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 10px;
+    }
+    .avoid-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--red-light);
+      border-left: 4px solid var(--red);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 0.88rem;
+      font-weight: 500;
+    }
+    .avoid-item .x { color: var(--red); font-size: 1rem; font-weight: 700; flex-shrink: 0; }
+
+    /* FREE FOODS */
+    .free-foods-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+    .free-tag {
+      background: var(--green-light);
+      color: var(--green);
+      border: 1px solid #a5d6a7;
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+    .fruit-tag {
+      background: var(--yellow-light);
+      color: #e65100;
+      border: 1px solid #ffe082;
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    /* DAILY CONSUMPTION */
+    .daily-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .daily-item:last-child { border-bottom: none; }
+    .daily-icon { font-size: 1.4rem; }
+
+    /* RESET BTN */
+    .reset-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--gray);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 4px;
+    }
+    .reset-btn:hover { background: var(--red-light); color: var(--red); border-color: var(--red); }
+
+    /* PLAN SWITCHER */
+    .plan-switch {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .plan-btn {
+      flex: 1;
+      min-width: 160px;
+      padding: 10px 16px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      color: var(--muted);
+    }
+    .plan-btn.active { border-color: var(--navy); color: var(--navy); background: #e8eaf6; }
+    .plan-content { display: none; }
+    .plan-content.active { display: block; }
+
+    /* STREAK */
+    .streak-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .streak-day {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      gap: 2px;
+      border: 2px solid var(--border);
+      background: white;
+    }
+    .streak-day .day-label { font-size: 0.6rem; color: var(--muted); }
+    .streak-day.done { background: var(--green-light); border-color: #81c784; color: var(--green); }
+    .streak-day.partial { background: var(--yellow-light); border-color: #ffd54f; color: #e65100; }
+    .streak-day.today { border-color: var(--navy); }
+
+    /* RESPONSIVE */
+    @media (max-width: 500px) {
+      .avoid-grid { grid-template-columns: 1fr; }
+      .streak-grid { grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-area">
+    <h1>🏥 Livasa Diet Tracker</h1>
+    <p>Diabetes · High Fibre + High Protein</p>
+  </div>
+  <div class="date-display">
+    <div class="day" id="headerDay"></div>
+    <div id="headerDate"></div>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('tracker')">📋 Daily Tracker</button>
+  <button class="tab-btn" onclick="switchTab('guidelines')">📌 Guidelines</button>
+  <button class="tab-btn" onclick="switchTab('avoid')">🚫 Foods to Avoid</button>
+  <button class="tab-btn" onclick="switchTab('progress')">📈 Progress</button>
+</div>
+
+<main>
+
+  <!-- ===================== TRACKER TAB ===================== -->
+  <div class="tab-pane active" id="tab-tracker">
+
+    <div class="plan-switch">
+      <button class="plan-btn active" id="planBtn-diabetes" onclick="switchPlan('diabetes')">🩺 Diabetes Diet</button>
+      <button class="plan-btn" id="planBtn-hfhp" onclick="switchPlan('hfhp')">💪 High Fibre + Protein</button>
+    </div>
+
+    <!-- DIABETES PLAN -->
+    <div class="plan-content active" id="plan-diabetes">
+      <div class="card">
+        <div class="card-header" style="background: linear-gradient(90deg,#e8eaf6,#fff);">
+          <span class="icon">📊</span>
+          <div>
+            <div>Today's Progress — Diabetes Plan</div>
+            <div style="font-size:0.78rem;font-weight:400;color:var(--muted)">Check meals as you complete them</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="progress-pct" id="diab-pct">0%</div>
+          <div class="progress-caption" id="diab-caption">0 of 10 meals done</div>
+          <div class="progress-wrap" style="margin-top:10px">
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="diab-bar" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="background:var(--teal-light);">
+          <span class="icon">🌅</span> Early Morning
+        </div>
+        <div class="card-body">
+          <div class="meal-section">
+            <div class="meal-item" id="d-m1">
+              <input type="checkbox" onchange="updateProgress()" data-plan="diab" />
+              <div class="meal-text">
+                <div class="meal-name">Plain Water</div>
+                <div class="meal-detail">1 glass</div>
+              </div>
+              <span class="meal-badge">On waking</span>
+            </div>
+            <div class="meal-item" id="d-m2">
+              <input type="checkbox" onchange="updateProgress()" data-plan="diab" />
+              <div class="meal-text">
+                <div class="meal-name">Tea (no sugar) + 2 Biscuits</div>
+                <div class="meal-detail">1 cup tea · Marie biscuits / Nutri choice biscuits</div>
+              </div>
+              <span class="meal-badge">Early morning</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="background:#fff8e1;">
+          <span class="icon">🍳</span> Breakfast (8:00–8:30am)
+        </div>
+        <div class="card-body">
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="diab" />
+            <div class="meal-text">
+              <div class="meal-name">Milk (no sugar, 200ml) + 2 Boiled Egg Whites</div>
+              <div class="meal-detail">1 cup double toned milk</div>
+            </div>
+            <span class="meal-badge">8:00am</span>
+          </div>
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="diab" />
+            <div class="meal-text">
+              <div class="meal-name">Cereal OR Stuffed Roti</div>
+              <div class="meal-detail">30gm cereal (wheat flakes / dalia / white oats / veg poha) · OR · 2 stuffed roti without oil · OR · 2 brown bread slices stuffed with vegetables</div>
+            </div>
+          </div>
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="diab" />
+            <div class="meal-text">
+              <div class="meal-name">Curd / Double Toned Milk</div>
+              <div class="meal-detail">1 katori / 1 glass</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="background:#f3e5f5;">
+          <span class="icon">🍎</span> Mid Day Supplement (10:30–11:30am)
+        </div>
+        <div class="card-body">
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="diab" />
+            <div class="meal-text">
+              <div class="meal-name">Snack / Fruit</div>
+              <div class="meal-detail">Plain lassi · OR · roasted chana · OR · plain lemon water · OR · sprouts · OR · 1 fruit (max 150gm/day) — Apple/Papaya/Guava/Mausami/Apricot/Pear</div>
+            </div>
+            <span class="meal-badge">10:30am</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="background:#e8f5e9;">
+          <span class="icon">🍽️</span> Lunch (1:00–2:00pm)
+        </div>
+        <div class="card-body">
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="diab" />
+            <div class="meal-text">
+              <div class="meal-name">Salad</div>
+              <div class="meal-detail">1 plate — 30 min before meal · Avoid aloo & boondi raita</div>
+            </div>
+          </div>
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="diab" />
+            <div class="meal-text">
+              <div class="meal-name">Chapatti + Dal + Vegetable + Curd</div>
+              <div class="meal-detail">2–3 chapatti without oil · 1–2 katori vegetable · 1 katori dal · 1 katori curd</div>
+            </div>
+            <span class="meal-badge">1:00pm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="background:#fff3e0;">
+          <span class="icon">☕</span> Evening Tea (4:00–5:00pm)
+        </div>
+        <div class="card-body">
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="diab" />
+            <div class="meal-text">
+              <div class="meal-name">Tea (no sugar) + 2 Biscuits</div>
+              <div class="meal-detail">1 cup · Marie digestive / nutri digestive biscuits</div>
+            </div>
+            <span class="meal-badge">4:00pm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="background:#e3f2fd;">
+          <span class="icon">🌙</span> Dinner (8:30–9:00pm)
+        </div>
+        <div class="card-body">
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="diab" />
+            <div class="meal-text">
+              <div class="meal-name">Salad</div>
+              <div class="meal-detail">1 plate — 30 min before meal</div>
+            </div>
+          </div>
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="diab" />
+            <div class="meal-text">
+              <div class="meal-name">Chapatti + Vegetable / Protein</div>
+              <div class="meal-detail">2 chapatti without oil · 1–2 katori vegetable · OR · Paneer 50gm · OR · Roasted chicken 100gm / Roasted fish 1 katori</div>
+            </div>
+            <span class="meal-badge">8:30pm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="background:var(--teal-light);">
+          <span class="icon">💧</span> Daily Consumption Targets
+        </div>
+        <div class="card-body">
+          <div class="daily-item"><span class="daily-icon">🥛</span> Double toned milk — 500ml total (including tea + curd + milk)</div>
+          <div class="daily-item"><span class="daily-icon">💧</span> Water — 10–12 glasses</div>
+          <div class="daily-item"><span class="daily-icon">🫙</span> Refined oil / mustard oil — 3–4 tsp for tarka only</div>
+        </div>
+      </div>
+
+      <button class="reset-btn" onclick="resetPlan('diab')">🔄 Reset Today's Diabetes Checklist</button>
+    </div>
+
+    <!-- HFHP PLAN -->
+    <div class="plan-content" id="plan-hfhp">
+      <div class="card">
+        <div class="card-header" style="background: linear-gradient(90deg,#ede7f6,#fff);">
+          <span class="icon">📊</span>
+          <div>
+            <div>Today's Progress — High Fibre + Protein Plan</div>
+            <div style="font-size:0.78rem;font-weight:400;color:var(--muted)">Check meals as you complete them</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="progress-pct" id="hfhp-pct">0%</div>
+          <div class="progress-caption" id="hfhp-caption">0 of 8 meals done</div>
+          <div class="progress-wrap" style="margin-top:10px">
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="hfhp-bar" style="width:0%;background:linear-gradient(90deg,var(--purple),#7b1fa2)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="background:var(--teal-light);">
+          <span class="icon">🌅</span> Early Morning
+        </div>
+        <div class="card-body">
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="hfhp" />
+            <div class="meal-text">
+              <div class="meal-name">Overnight Soaked Almonds + Walnut</div>
+              <div class="meal-detail">5–6 almonds + 1 walnut</div>
+            </div>
+          </div>
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="hfhp" />
+            <div class="meal-text">
+              <div class="meal-name">Lemon Water / Plain Water + Tea + Marie Biscuits</div>
+              <div class="meal-detail">1 glass water · 1 cup tea · 2 Marie biscuits</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="background:#fff8e1;">
+          <span class="icon">🍳</span> Breakfast (7:30–8:00am)
+        </div>
+        <div class="card-body">
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="hfhp" />
+            <div class="meal-text">
+              <div class="meal-name">Cereal OR Missi Roti / Stuffed Roti</div>
+              <div class="meal-detail">1 bowl (Dalia / poha / vermicelli / oats) · OR · 2 missi roti / 2 stuffed roti</div>
+            </div>
+            <span class="meal-badge">7:30am</span>
+          </div>
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="hfhp" />
+            <div class="meal-text">
+              <div class="meal-name">Milk / Curd + Egg Whites</div>
+              <div class="meal-detail">1 glass milk / 1 bowl curd · 2 egg whites</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="background:#f3e5f5;">
+          <span class="icon">🍎</span> Mid Morning (10:30–11:00am)
+        </div>
+        <div class="card-body">
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="hfhp" />
+            <div class="meal-text">
+              <div class="meal-name">Fruit</div>
+              <div class="meal-detail">1–2 fruits</div>
+            </div>
+            <span class="meal-badge">10:30am</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="background:#e8f5e9;">
+          <span class="icon">🍽️</span> Lunch (1:00–1:30pm)
+        </div>
+        <div class="card-body">
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="hfhp" />
+            <div class="meal-text">
+              <div class="meal-name">Salad + Chapati / Rice + Dal + Curd</div>
+              <div class="meal-detail">Salad 30 min before · 2–3 chapati / 1 bowl rice · 1 bowl dal · 1 bowl curd</div>
+            </div>
+            <span class="meal-badge">1:00pm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="background:#fff3e0;">
+          <span class="icon">☕</span> Evening Tea (4:00–5:00pm)
+        </div>
+        <div class="card-body">
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="hfhp" />
+            <div class="meal-text">
+              <div class="meal-name">Tea / Coffee / Milk + 2 Biscuits</div>
+              <div class="meal-detail">1 cup · Marie / Digestive biscuits</div>
+            </div>
+            <span class="meal-badge">4:00pm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="background:#fce4ec;">
+          <span class="icon">🥣</span> Pre Dinner
+        </div>
+        <div class="card-body">
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="hfhp" />
+            <div class="meal-text">
+              <div class="meal-name">Homemade Veg Soup / Sprouts / Black Channa</div>
+              <div class="meal-detail">1 bowl</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="background:#e3f2fd;">
+          <span class="icon">🌙</span> Dinner (8:30–9:00pm)
+        </div>
+        <div class="card-body">
+          <div class="meal-item">
+            <input type="checkbox" onchange="updateProgress()" data-plan="hfhp" />
+            <div class="meal-text">
+              <div class="meal-name">Salad + Chapatti + Dal/Vegetable + Curd</div>
+              <div class="meal-detail">Salad 30 min before · 2 chapatti · 1–2 bowls dal/vegetable · curd</div>
+            </div>
+            <span class="meal-badge">8:30pm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="background:var(--teal-light);">
+          <span class="icon">🌛</span> Post Dinner
+        </div>
+        <div class="card-body">
+          <div class="daily-item"><span class="daily-icon">🥛</span> Milk — 1 cup</div>
+          <div class="daily-item"><span class="daily-icon">💧</span> Water intake — at least 10–12 glasses/day</div>
+          <div class="daily-item"><span class="daily-icon">🫙</span> Fat/oil — not more than 3–4 tsp/day for cooking</div>
+          <div class="daily-item"><span class="daily-icon">⏱️</span> Never take less than 20 minutes to finish a meal</div>
+        </div>
+      </div>
+
+      <button class="reset-btn" onclick="resetPlan('hfhp')">🔄 Reset Today's HFHP Checklist</button>
+    </div>
+  </div>
+
+  <!-- ===================== GUIDELINES TAB ===================== -->
+  <div class="tab-pane" id="tab-guidelines">
+
+    <div class="card">
+      <div class="card-header" style="background:var(--teal-light);">
+        <span class="icon">📌</span> Basic Guidelines (Diabetes Diet)
+      </div>
+      <div class="card-body">
+        <ul class="guideline-list">
+          <li><span class="guideline-num">1</span> Have regular meals — skipping meals may be dangerous for you.</li>
+          <li><span class="guideline-num">2</span> Do not starve yourself. Choose from the free foods listed for you.</li>
+          <li><span class="guideline-num">3</span> Cereals are major sources of carbohydrates and should be consumed in prescribed amounts.</li>
+          <li><span class="guideline-num">4</span> Whole pulses and legumes like rajmah, chana, soyabean, rongi etc are rich in fiber — use them regularly.</li>
+          <li><span class="guideline-num">5</span> Mild and regular exercise is good for you.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="background:#ede7f6;">
+        <span class="icon">💪</span> Guidelines (High Fibre + High Protein Diet)
+      </div>
+      <div class="card-body">
+        <ul class="guideline-list">
+          <li><span class="guideline-num">1</span> Eat on same schedule each day and on time.</li>
+          <li><span class="guideline-num">2</span> Eat slowly, chew well and never take less than 20 minutes to finish a meal.</li>
+          <li><span class="guideline-num">3</span> High fibre foods: green leafy vegetables, fresh salads, fresh fruits, whole pulses with husk, oats, dalia.</li>
+          <li><span class="guideline-num">4</span> High protein foods: milk, paneer, sprouts, roasted chana, soyabean, besan, pulses, lassi, chicken, fish, egg white.</li>
+          <li><span class="guideline-num">5</span> Plenty of fluids: coconut water, lemon water, soups, lassi, water. Water intake at least 10–12 glasses.</li>
+          <li><span class="guideline-num">6</span> Fat (oil) content should not be more than 3–4 tsp/day for cooking.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="background:var(--green-light);">
+        <span class="icon">✅</span> Free Foods (Diabetes)
+      </div>
+      <div class="card-body">
+        <div class="free-foods-wrap">
+          <span class="free-tag">Clear vegetable soup</span>
+          <span class="free-tag">Plain tea</span>
+          <span class="free-tag">Diluted buttermilk</span>
+          <span class="free-tag">Thin lassi</span>
+          <span class="free-tag">Green leafy vegetables</span>
+          <span class="free-tag">Mint Coriander Chutney</span>
+          <span class="free-tag">Plain lemon water</span>
+          <span class="free-tag">Salad vegetables</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="background:var(--yellow-light);">
+        <span class="icon">🍎</span> Permitted Fruits
+      </div>
+      <div class="card-body">
+        <div class="free-foods-wrap">
+          <span class="fruit-tag">🍎 Apple</span>
+          <span class="fruit-tag">🧡 Papaya</span>
+          <span class="fruit-tag">🟢 Guava</span>
+          <span class="fruit-tag">🍊 Mausami</span>
+          <span class="fruit-tag">🟠 Apricot</span>
+          <span class="fruit-tag">🍐 Pear</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== AVOID TAB ===================== -->
+  <div class="tab-pane" id="tab-avoid">
+
+    <div class="card" style="border-left: 4px solid var(--red);">
+      <div class="card-header" style="background:var(--red-light);">
+        <span class="icon">🚫</span> Foods to Avoid — Diabetes Diet
+      </div>
+      <div class="card-body">
+        <div class="avoid-grid">
+          <div class="avoid-item"><span class="x">✗</span> Fried foods — poori, parantha, samosa, pakora, butter, malai</div>
+          <div class="avoid-item"><span class="x">✗</span> Sugar, jaggery, shaker, mythoi, puddings, ice creams, cakes, pastries</div>
+          <div class="avoid-item"><span class="x">✗</span> Organ meats, mutton, pork</div>
+          <div class="avoid-item"><span class="x">✗</span> Cold drinks, sherbet, squashes, juices</div>
+          <div class="avoid-item"><span class="x">✗</span> Dry fruits, nuts and pickles</div>
+          <div class="avoid-item"><span class="x">✗</span> Alcoholic drinks and cigarettes</div>
+          <div class="avoid-item"><span class="x">✗</span> Vegetables: potatoes, arbi, shakerkandi, kachalu, zimikand, kathal</div>
+          <div class="avoid-item"><span class="x">✗</span> Processed cheese, table salt, papad, chutneys, sauces</div>
+          <div class="avoid-item"><span class="x">✗</span> Mango, banana, grapes, dates, lichi, chikoo</div>
+          <div class="avoid-item"><span class="x">✗</span> Outside food</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="border-left: 4px solid var(--red);">
+      <div class="card-header" style="background:var(--red-light);">
+        <span class="icon">🚫</span> Foods to Avoid — High Fibre + Protein Diet
+      </div>
+      <div class="card-body">
+        <div class="avoid-grid">
+          <div class="avoid-item"><span class="x">✗</span> High fat foods, high salt foods — poori, parantha, samosa, pakora, namkeen, chips, pickles, butter, ghee, malai, papad, ketchup</div>
+          <div class="avoid-item"><span class="x">✗</span> Foods high in sugar — burfi, laddoo, cakes, pastries, ice cream, chocolates, puddings</div>
+          <div class="avoid-item"><span class="x">✗</span> Deep fried foods of any kind</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="background:#e8f5e9; border-left: 4px solid var(--green);">
+      <div class="card-header" style="background:var(--green-light);">
+        <span class="icon">✅</span> Foods to Include (HFHP Plan)
+      </div>
+      <div class="card-body">
+        <div class="free-foods-wrap">
+          <span class="free-tag">Green leafy vegs</span>
+          <span class="free-tag">Fresh salads</span>
+          <span class="free-tag">Fresh fruits</span>
+          <span class="free-tag">Whole pulses</span>
+          <span class="free-tag">Pulses with husk</span>
+          <span class="free-tag">Oats</span>
+          <span class="free-tag">Dalia</span>
+          <span class="free-tag">Milk</span>
+          <span class="free-tag">Paneer</span>
+          <span class="free-tag">Sprouts</span>
+          <span class="free-tag">Roasted chana</span>
+          <span class="free-tag">Soyabean</span>
+          <span class="free-tag">Besan</span>
+          <span class="free-tag">Pulses</span>
+          <span class="free-tag">Lassi</span>
+          <span class="free-tag">Chicken</span>
+          <span class="free-tag">Fish</span>
+          <span class="free-tag">Egg white</span>
+          <span class="free-tag">Coconut water</span>
+          <span class="free-tag">Lemon water</span>
+          <span class="free-tag">Soups</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PROGRESS TAB ===================== -->
+  <div class="tab-pane" id="tab-progress">
+
+    <div class="card">
+      <div class="card-header" style="background:var(--teal-light);">
+        <span class="icon">📈</span> Weekly Adherence (Last 7 Days)
+      </div>
+      <div class="card-body">
+        <div class="streak-grid" id="streakGrid"></div>
+        <div style="display:flex;gap:12px;font-size:0.78rem;margin-top:8px;flex-wrap:wrap;">
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:14px;border-radius:4px;background:var(--green-light);border:2px solid #81c784;display:inline-block;"></span>100% done</span>
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:14px;border-radius:4px;background:var(--yellow-light);border:2px solid #ffd54f;display:inline-block;"></span>Partial</span>
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:14px;height:14px;border-radius:4px;background:white;border:2px solid var(--border);display:inline-block;"></span>Not tracked</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="background:#e8eaf6;">
+        <span class="icon">📊</span> Today at a Glance
+      </div>
+      <div class="card-body" id="glanceBody">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div style="text-align:center;padding:16px;background:var(--teal-light);border-radius:10px;">
+            <div style="font-size:2rem;font-weight:700;color:var(--teal);" id="glance-diab-pct">0%</div>
+            <div style="font-size:0.8rem;color:var(--muted);">Diabetes Plan</div>
+          </div>
+          <div style="text-align:center;padding:16px;background:#ede7f6;border-radius:10px;">
+            <div style="font-size:2rem;font-weight:700;color:var(--purple);" id="glance-hfhp-pct">0%</div>
+            <div style="font-size:0.8rem;color:var(--muted);">High Fibre + Protein</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" style="background:#fff3e0;">
+        <span class="icon">💡</span> Today's Reminder
+      </div>
+      <div class="card-body" id="reminderCard">
+        <p style="font-size:0.9rem;line-height:1.7;" id="reminderText">Loading your tip for today…</p>
+      </div>
+    </div>
+
+    <button class="reset-btn" onclick="resetAll()" style="border-color:var(--red);color:var(--red);">
+      🗑️ Clear All Progress & History
+    </button>
+  </div>
+
+</main>
+
+<script>
+  // ─── CONSTANTS ────────────────────────────────────────────
+  const TIPS = [
+    "Eat slowly — take at least 20 minutes for each meal. Your body needs time to signal fullness.",
+    "Salad first! Eat your salad 30 minutes before lunch and dinner to fill up on fibre.",
+    "Drink 10–12 glasses of water today. Keep a bottle visible as a reminder.",
+    "Skipping meals raises blood sugar. Keep your meal timings consistent every day.",
+    "Choose whole pulses like rajmah or chana — they slow glucose absorption.",
+    "Replace your evening biscuits with roasted chana for a high-protein, diabetic-friendly snack.",
+    "Cooking oil limit: 3–4 tsp per day. Mustard oil is preferred — measure don't pour.",
+    "Always prefer home-cooked food. Restaurant food often has hidden sugar and salt.",
+    "Exercise tip: even a 20-minute walk after dinner helps control blood sugar.",
+    "Permitted fruits today: Apple, Papaya, Guava, Mausami, Apricot, or Pear. Avoid mango & banana.",
+  ];
+
+  const DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  // ─── DATE HEADER ────────────────────────────────────────────
+  function updateDateHeader() {
+    const now = new Date();
+    document.getElementById('headerDay').textContent =
+      DAYS_SHORT[now.getDay()] + ', ' + MONTHS[now.getMonth()] + ' ' + now.getDate();
+    document.getElementById('headerDate').textContent = now.getFullYear();
+  }
+
+  // ─── TABS ────────────────────────────────────────────────
+  function switchTab(id) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    event.currentTarget.classList.add('active');
+    if (id === 'progress') renderProgress();
+  }
+
+  // ─── PLAN SWITCHER ────────────────────────────────────────────
+  function switchPlan(plan) {
+    document.querySelectorAll('.plan-content').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.plan-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('plan-' + plan).classList.add('active');
+    document.getElementById('planBtn-' + plan).classList.add('active');
+  }
+
+  // ─── STORAGE KEY ────────────────────────────────────────────
+  function todayKey() {
+    const d = new Date();
+    return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+  }
+
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem('dietState') || '{}'); } catch { return {}; }
+  }
+  function saveState(s) {
+    localStorage.setItem('dietState', JSON.stringify(s));
+  }
+
+  // ─── PROGRESS UPDATE ────────────────────────────────────────────
+  function updateProgress() {
+    const diabBoxes = [...document.querySelectorAll('[data-plan="diab"]')];
+    const hfhpBoxes = [...document.querySelectorAll('[data-plan="hfhp"]')];
+
+    const diabDone = diabBoxes.filter(b => b.checked).length;
+    const hfhpDone = hfhpBoxes.filter(b => b.checked).length;
+    const diabTotal = diabBoxes.length;
+    const hfhpTotal = hfhpBoxes.length;
+
+    const diabPct = diabTotal ? Math.round(diabDone / diabTotal * 100) : 0;
+    const hfhpPct = hfhpTotal ? Math.round(hfhpDone / hfhpTotal * 100) : 0;
+
+    document.getElementById('diab-pct').textContent = diabPct + '%';
+    document.getElementById('diab-caption').textContent = diabDone + ' of ' + diabTotal + ' meals done';
+    document.getElementById('diab-bar').style.width = diabPct + '%';
+
+    document.getElementById('hfhp-pct').textContent = hfhpPct + '%';
+    document.getElementById('hfhp-caption').textContent = hfhpDone + ' of ' + hfhpTotal + ' meals done';
+    document.getElementById('hfhp-bar').style.width = hfhpPct + '%';
+
+    // Style checked items
+    diabBoxes.forEach(b => {
+      const item = b.closest('.meal-item');
+      if (item) item.classList.toggle('done', b.checked);
+    });
+    hfhpBoxes.forEach(b => {
+      const item = b.closest('.meal-item');
+      if (item) item.classList.toggle('done', b.checked);
+    });
+
+    // Persist
+    const state = loadState();
+    const key = todayKey();
+    state[key] = state[key] || {};
+    state[key].diab = diabBoxes.map(b => b.checked);
+    state[key].hfhp = hfhpBoxes.map(b => b.checked);
+    saveState(state);
+
+    // Update glance
+    document.getElementById('glance-diab-pct').textContent = diabPct + '%';
+    document.getElementById('glance-hfhp-pct').textContent = hfhpPct + '%';
+  }
+
+  function restoreCheckboxes() {
+    const state = loadState();
+    const key = todayKey();
+    if (!state[key]) return;
+
+    const diabBoxes = [...document.querySelectorAll('[data-plan="diab"]')];
+    const hfhpBoxes = [...document.querySelectorAll('[data-plan="hfhp"]')];
+
+    if (state[key].diab) state[key].diab.forEach((v, i) => { if (diabBoxes[i]) diabBoxes[i].checked = v; });
+    if (state[key].hfhp) state[key].hfhp.forEach((v, i) => { if (hfhpBoxes[i]) hfhpBoxes[i].checked = v; });
+
+    updateProgress();
+  }
+
+  function resetPlan(plan) {
+    if (!confirm('Reset all checkboxes for this plan?')) return;
+    document.querySelectorAll('[data-plan="' + plan + '"]').forEach(b => b.checked = false);
+    updateProgress();
+  }
+
+  function resetAll() {
+    if (!confirm('Clear ALL progress and history? This cannot be undone.')) return;
+    localStorage.removeItem('dietState');
+    document.querySelectorAll('input[type="checkbox"]').forEach(b => b.checked = false);
+    updateProgress();
+    renderProgress();
+  }
+
+  // ─── PROGRESS TAB ────────────────────────────────────────────
+  function renderProgress() {
+    const state = loadState();
+    const grid = document.getElementById('streakGrid');
+    grid.innerHTML = '';
+
+    const today = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const key = d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+      const dayData = state[key];
+
+      const cell = document.createElement('div');
+      cell.className = 'streak-day' + (i === 0 ? ' today' : '');
+
+      let pct = 0;
+      if (dayData) {
+        const allChecks = [...(dayData.diab || []), ...(dayData.hfhp || [])];
+        if (allChecks.length) {
+          pct = Math.round(allChecks.filter(Boolean).length / allChecks.length * 100);
+        }
+      }
+
+      if (pct === 100) cell.classList.add('done');
+      else if (pct > 0) cell.classList.add('partial');
+
+      cell.innerHTML = '<span class="day-label">' + DAYS_SHORT[d.getDay()] + '</span>' +
+                       '<span>' + (pct > 0 ? pct + '%' : '—') + '</span>';
+      grid.appendChild(cell);
+    }
+
+    // Reminder tip
+    const tipIdx = today.getDate() % TIPS.length;
+    document.getElementById('reminderText').textContent = TIPS[tipIdx];
+
+    // Glance update
+    const diabBoxes = [...document.querySelectorAll('[data-plan="diab"]')];
+    const hfhpBoxes = [...document.querySelectorAll('[data-plan="hfhp"]')];
+    const diabPct = diabBoxes.length ? Math.round(diabBoxes.filter(b=>b.checked).length/diabBoxes.length*100) : 0;
+    const hfhpPct = hfhpBoxes.length ? Math.round(hfhpBoxes.filter(b=>b.checked).length/hfhpBoxes.length*100) : 0;
+    document.getElementById('glance-diab-pct').textContent = diabPct + '%';
+    document.getElementById('glance-hfhp-pct').textContent = hfhpPct + '%';
+  }
+
+  // ─── INIT ────────────────────────────────────────────────
+  updateDateHeader();
+  restoreCheckboxes();
+  renderProgress();
+</script>
+</body>
+</html>
