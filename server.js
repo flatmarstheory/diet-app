@@ -12,7 +12,11 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`\n✅ Livasa Diet Tracker running at:`);
-  console.log(`   http://localhost:${PORT}\n`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log("\nLivasa Diet Tracker running at:");
+    console.log(`http://localhost:${PORT}\n`);
+  });
+}
+
+module.exports = app;
