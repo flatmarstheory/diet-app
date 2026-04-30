@@ -7,8 +7,8 @@ const PORT = process.env.PORT || 3000;
 // Serve static files from public/
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Fallback to index.html
-app.get('*', (req, res) => {
+// Fallback to index.html (Express 5 wildcard syntax)
+app.get('/{*any}', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
